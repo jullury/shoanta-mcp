@@ -77,8 +77,8 @@ server.registerTool(
     },
   },
   async ({ collectionId }) => {
-    const data = await api<{ tickets: unknown[] }>(
-      `/databases/${collectionId}/tickets`,
+    const data = await api<{ documents: unknown[] }>(
+      `/databases/${collectionId}/documents`,
     );
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
@@ -96,7 +96,7 @@ server.registerTool(
     },
   },
   async ({ documentId }) => {
-    const data = await api<unknown>(`/tickets/${documentId}`);
+    const data = await api<unknown>(`/documents/${documentId}`);
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
     };
@@ -116,8 +116,8 @@ server.registerTool(
     },
   },
   async ({ collectionId, title, content, properties }) => {
-    const data = await api<{ ticket: unknown }>(
-      `/databases/${collectionId}/tickets`,
+    const data = await api<{ document: unknown }>(
+      `/databases/${collectionId}/documents`,
       {
         method: "POST",
         body: JSON.stringify({ title, content, properties }),
@@ -147,7 +147,7 @@ server.registerTool(
     if (title !== undefined) body.title = title;
     if (content !== undefined) body.content = content;
     if (properties !== undefined) body.properties = properties;
-    const data = await api<{ ticket: unknown }>(`/tickets/${documentId}`, {
+    const data = await api<{ document: unknown }>(`/documents/${documentId}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     });
@@ -173,7 +173,7 @@ server.registerTool(
   },
   async ({ documentId, archive }) => {
     const qs = archive ? "?archive=true" : "";
-    const data = await api<{ ok: boolean }>(`/tickets/${documentId}${qs}`, {
+    const data = await api<{ ok: boolean }>(`/documents/${documentId}${qs}`, {
       method: "DELETE",
     });
     return {
@@ -193,7 +193,7 @@ server.registerTool(
   },
   async ({ documentId }) => {
     const data = await api<{ comments: unknown[] }>(
-      `/tickets/${documentId}/comments`,
+      `/documents/${documentId}/comments`,
     );
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
@@ -213,7 +213,7 @@ server.registerTool(
   },
   async ({ documentId, body }) => {
     const data = await api<{ comment: unknown }>(
-      `/tickets/${documentId}/comments`,
+      `/documents/${documentId}/comments`,
       {
         method: "POST",
         body: JSON.stringify({ body }),
