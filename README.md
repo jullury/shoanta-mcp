@@ -1,7 +1,7 @@
 # Shoanta MCP Server
 
 A **stdio-based MCP (Model Context Protocol) server** that lets any AI agent
-(Claude, opencode, Cursor, Windsurf, etc.) read and update Shoanta tickets
+(Claude, opencode, Cursor, Windsurf, etc.) read and update Shoanta documents
 through the Shoanta REST API (`/api/v1`).
 
 The MCP server is a thin proxy: it calls the Shoanta HTTP API using a
@@ -44,16 +44,16 @@ node dist/index.mjs
 
 ## Tools
 
-| Tool              | Description                                        |
-| ----------------- | -------------------------------------------------- |
-| `list_databases`  | List database boards in the workspace              |
-| `list_tickets`    | List tickets in a database board                   |
-| `get_ticket`      | Get one ticket by ID (with property values)        |
-| `create_ticket`   | Create a ticket in a board                         |
-| `update_ticket`   | Update title, content, and/or property values      |
-| `delete_ticket`   | Delete a ticket (or archive with `archive: true`)  |
-| `list_comments`   | List comments on a ticket                          |
-| `add_comment`     | Add a comment to a ticket                          |
+| Tool                   | Description                                       |
+| ---------------------- | ------------------------------------------------- |
+| `list_collections`     | List all collections (databases) in the workspace |
+| `list_documents`       | List all documents in a collection                |
+| `get_document`         | Get one document by ID (with property values)     |
+| `create_document`      | Create a document in a collection                 |
+| `update_document`      | Update title, content, and/or property values     |
+| `delete_document`      | Delete a document (or archive with `archive: true`) |
+| `list_comments`        | List comments on a document                       |
+| `add_comment`          | Add a comment to a document                       |
 
 ## Connecting an agent
 

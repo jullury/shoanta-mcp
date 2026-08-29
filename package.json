@@ -1,7 +1,7 @@
 {
   "name": "@jullury/shoanta-mcp",
-  "version": "0.1.0",
-  "description": "MCP server that lets AI agents read/update Shoanta tickets via the Shoanta REST API",
+  "version": "0.2.0",
+  "description": "MCP server that lets AI agents read/update Shoanta documents and collections via the Shoanta REST API",
   "type": "module",
   "main": "dist/index.mjs",
   "exports": {
@@ -23,7 +23,8 @@
     "mcp",
     "model-context-protocol",
     "shoanta",
-    "tickets",
+    "documents",
+    "collections",
     "ai",
     "agent"
   ],

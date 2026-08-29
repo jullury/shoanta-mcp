@@ -34,7 +34,7 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 const server = new McpServer({
   name: "shoanta",
-  version: "0.1.0",
+  version: "0.2.0",
 });
 
 const propertiesSchema = z
@@ -52,10 +52,10 @@ const propertiesSchema = z
   );
 
 server.registerTool(
-  "list_databases",
+  "list_collections",
   {
-    title: "List databases",
-    description: "List all databases (boards) in the Shoanta workspace.",
+    title: "List collections",
+    description: "List all collections (databases) in the Shoanta workspace.",
   },
   async () => {
     const data = await api<
@@ -68,17 +68,17 @@ server.registerTool(
 );
 
 server.registerTool(
-  "list_tickets",
+  "list_documents",
   {
-    title: "List tickets",
-    description: "List all tickets (pages/cards) in a database board.",
+    title: "List documents",
+    description: "List all documents in a collection.",
     inputSchema: {
-      databaseId: z.string().describe("ID of the database/board"),
+      collectionId: z.string().describe("ID of the collection (database)"),
     },
   },
-  async ({ databaseId }) => {
+  async ({ collectionId }) => {
     const data = await api<{ tickets: unknown[] }>(
-      `/databases/${databaseId}/tickets`,
+      `/databases/${collectionId}/tickets`,
     );
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
@@ -87,16 +87,16 @@ server.registerTool(
 );
 
 server.registerTool(
-  "get_ticket",
+  "get_document",
   {
-    title: "Get ticket",
-    description: "Get a single ticket by ID, including its property values.",
+    title: "Get document",
+    description: "Get a single document by ID, including its property values.",
     inputSchema: {
-      ticketId: z.string().describe("Ticket ID"),
+      documentId: z.string().describe("Document ID"),
     },
   },
-  async ({ ticketId }) => {
-    const data = await api<unknown>(`/tickets/${ticketId}`);
+  async ({ documentId }) => {
+    const data = await api<unknown>(`/tickets/${documentId}`);
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
     };
@@ -104,20 +104,20 @@ server.registerTool(
 );
 
 server.registerTool(
-  "create_ticket",
+  "create_document",
   {
-    title: "Create ticket",
-    description: "Create a new ticket (card) in a database board.",
+    title: "Create document",
+    description: "Create a new document in a collection.",
     inputSchema: {
-      databaseId: z.string().describe("ID of the database/board"),
-      title: z.string().describe("Ticket title"),
-      content: z.string().optional().describe("Ticket content (markdown)"),
+      collectionId: z.string().describe("ID of the collection (database)"),
+      title: z.string().describe("Document title"),
+      content: z.string().optional().describe("Document content (markdown)"),
       properties: propertiesSchema.optional(),
     },
   },
-  async ({ databaseId, title, content, properties }) => {
+  async ({ collectionId, title, content, properties }) => {
     const data = await api<{ ticket: unknown }>(
-      `/databases/${databaseId}/tickets`,
+      `/databases/${collectionId}/tickets`,
       {
         method: "POST",
         body: JSON.stringify({ title, content, properties }),
@@ -130,24 +130,24 @@ server.registerTool(
 );
 
 server.registerTool(
-  "update_ticket",
+  "update_document",
   {
-    title: "Update ticket",
+    title: "Update document",
     description:
-      "Update ticket title, content, and/or property values. Only provided fields are changed.",
+      "Update document title, content, and/or property values. Only provided fields are changed.",
     inputSchema: {
-      ticketId: z.string().describe("Ticket ID"),
+      documentId: z.string().describe("Document ID"),
       title: z.string().optional().describe("New title"),
       content: z.string().optional().describe("New content (markdown)"),
       properties: propertiesSchema.optional(),
     },
   },
-  async ({ ticketId, title, content, properties }) => {
+  async ({ documentId, title, content, properties }) => {
     const body: Record<string, unknown> = {};
     if (title !== undefined) body.title = title;
     if (content !== undefined) body.content = content;
     if (properties !== undefined) body.properties = properties;
-    const data = await api<{ ticket: unknown }>(`/tickets/${ticketId}`, {
+    const data = await api<{ ticket: unknown }>(`/tickets/${documentId}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     });
@@ -158,22 +158,22 @@ server.registerTool(
 );
 
 server.registerTool(
-  "delete_ticket",
+  "delete_document",
   {
-    title: "Delete ticket",
+    title: "Delete document",
     description:
-      "Delete a ticket. If archive is true, it is moved to trash instead of being permanently deleted.",
+      "Delete a document. If archive is true, it is moved to trash instead of being permanently deleted.",
     inputSchema: {
-      ticketId: z.string().describe("Ticket ID"),
+      documentId: z.string().describe("Document ID"),
       archive: z
         .boolean()
         .optional()
         .describe("Archive instead of hard-delete"),
     },
   },
-  async ({ ticketId, archive }) => {
+  async ({ documentId, archive }) => {
     const qs = archive ? "?archive=true" : "";
-    const data = await api<{ ok: boolean }>(`/tickets/${ticketId}${qs}`, {
+    const data = await api<{ ok: boolean }>(`/tickets/${documentId}${qs}`, {
       method: "DELETE",
     });
     return {
@@ -186,14 +186,14 @@ server.registerTool(
   "list_comments",
   {
     title: "List comments",
-    description: "List comments on a ticket.",
+    description: "List comments on a document.",
     inputSchema: {
-      ticketId: z.string().describe("Ticket ID"),
+      documentId: z.string().describe("Document ID"),
     },
   },
-  async ({ ticketId }) => {
+  async ({ documentId }) => {
     const data = await api<{ comments: unknown[] }>(
-      `/tickets/${ticketId}/comments`,
+      `/tickets/${documentId}/comments`,
     );
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
@@ -205,15 +205,15 @@ server.registerTool(
   "add_comment",
   {
     title: "Add comment",
-    description: "Add a comment to a ticket.",
+    description: "Add a comment to a document.",
     inputSchema: {
-      ticketId: z.string().describe("Ticket ID"),
+      documentId: z.string().describe("Document ID"),
       body: z.string().describe("Comment body"),
     },
   },
-  async ({ ticketId, body }) => {
+  async ({ documentId, body }) => {
     const data = await api<{ comment: unknown }>(
-      `/tickets/${ticketId}/comments`,
+      `/tickets/${documentId}/comments`,
       {
         method: "POST",
         body: JSON.stringify({ body }),
