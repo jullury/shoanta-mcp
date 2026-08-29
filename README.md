@@ -7,19 +7,33 @@ through the Shoanta REST API (`/api/v1`).
 The MCP server is a thin proxy: it calls the Shoanta HTTP API using a
 workspace-scoped API token, so all agents share the same auth and data.
 
-This folder is **standalone** — copy it into any project (or keep it here) and
-build it there.
+This package is published to **npm** as `@jullury/shoanta-mcp` — install it (or run it on demand with `npx`) rather than building from source.
 
-## Building
+## Installing
+
+Install the package globally (or in a project) so the `shoanta-mcp` command is
+available:
+
+```bash
+npm install -g @jullury/shoanta-mcp
+# or, without installing: npx -y @jullury/shoanta-mcp
+```
+
+Alternatively, run it on demand without a global install:
+
+```bash
+npx -y @jullury/shoanta-mcp
+```
+
+To build from source instead (e.g. for development):
 
 ```bash
 cd mcp
-pnpm install   # or: npm install
-pnpm build     # bundles to dist/index.mjs (self-contained, no install needed at runtime)
+npm install
+npm run build   # bundles to dist/index.mjs
 ```
 
-The built `dist/index.mjs` inlines all dependencies, so it runs anywhere with
-Node 20+.
+The built `dist/index.mjs` inlines all dependencies and runs on Node 20+.
 
 ## Configuration
 
@@ -39,7 +53,7 @@ and run the server:
 ```bash
 SHOANTA_API_URL=https://shoanta.jullury.com \
 SHOANTA_API_TOKEN=shoanta_... \
-node dist/index.mjs
+npx -y @jullury/shoanta-mcp
 ```
 
 ## Tools
@@ -67,7 +81,7 @@ Point your agent's MCP config at the built file with stdio transport.
   "mcp": {
     "Shoanta": {
       "type": "local",
-      "command": ["node", "/path/to/your/project/mcp/dist/index.mjs"],
+      "command": ["npx", "-y", "@jullury/shoanta-mcp"],
       "enabled": true,
       "environment": {
         "SHOANTA_API_URL": "https://shoanta.jullury.com",
@@ -85,8 +99,8 @@ Point your agent's MCP config at the built file with stdio transport.
 {
   "mcpServers": {
     "shoanta": {
-      "command": "node",
-      "args": ["/path/to/your/project/mcp/dist/index.mjs"],
+      "command": "npx",
+      "args": ["-y", "@jullury/shoanta-mcp"],
       "env": {
         "SHOANTA_API_URL": "https://shoanta.jullury.com",
         "SHOANTA_API_TOKEN": "shoanta_..."
@@ -98,5 +112,6 @@ Point your agent's MCP config at the built file with stdio transport.
 
 ### Cursor / Windsurf
 
-Add the server with `command: node`, args pointing to `mcp/dist/index.mjs`,
-and the two environment variables set.
+Add the server with `command: npx`, args `["-y", "@jullury/shoanta-mcp"]`, and
+the two environment variables set. The package is fetched from npm on first
+run, so no local build is required.
