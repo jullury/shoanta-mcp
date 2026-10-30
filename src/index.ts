@@ -225,5 +225,99 @@ server.registerTool(
   },
 );
 
+server.registerTool(
+  "list_properties",
+  {
+    title: "List properties",
+    description: "List all property (column) definitions for a collection.",
+    inputSchema: {
+      collectionId: z.string().describe("ID of the collection (database)"),
+    },
+  },
+  async ({ collectionId }) => {
+    const data = await api<unknown[]>(`/databases/${collectionId}/properties`);
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    };
+  },
+);
+
+server.registerTool(
+  "add_property",
+  {
+    title: "Add property",
+    description:
+      "Add a new property (column) to a collection. Type one of TEXT, NUMBER, SELECT, MULTI_SELECT, DATE, CHECKBOX, URL, FORMULA, RELATION (default TEXT). For SELECT/MULTI_SELECT, pass options as [{value, color?}].",
+    inputSchema: {
+      collectionId: z.string().describe("ID of the collection (database)"),
+      name: z.string().describe("Property name (column header)"),
+      type: z
+        .enum([
+          "TEXT",
+          "NUMBER",
+          "SELECT",
+          "MULTI_SELECT",
+          "DATE",
+          "CHECKBOX",
+          "URL",
+          "FORMULA",
+          "RELATION",
+        ])
+        .optional()
+        .describe("Property type (default TEXT)"),
+      options: z
+        .array(
+          z.object({
+            value: z.string(),
+            color: z.string().optional(),
+          }),
+        )
+        .optional()
+        .describe("Options for SELECT/MULTI_SELECT properties"),
+    },
+  },
+  async ({ collectionId, name, type, options }) => {
+    const body: Record<string, unknown> = { name };
+    if (type !== undefined) body.type = type;
+    if (options !== undefined) body.options = options;
+    const data = await api<unknown>(`/databases/${collectionId}/properties`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    };
+  },
+);
+
+server.registerTool(
+  "delete_property",
+  {
+    title: "Delete property",
+    description:
+      "Delete a property (column) from a collection by name. Removes the column and all its values.",
+    inputSchema: {
+      collectionId: z.string().describe("ID of the collection (database)"),
+      name: z.string().describe("Property name (column header) to delete"),
+    },
+  },
+  async ({ collectionId, name }) => {
+    const props = await api<{ id: string; name: string }[]>(
+      `/databases/${collectionId}/properties`,
+    );
+    const prop = props.find((p) => p.name === name);
+    if (!prop) {
+      throw new Error(`Property "${name}" not found in collection`);
+    }
+    const data = await api<{ ok: boolean }>(
+      `/databases/${collectionId}/properties/${prop.id}`,
+      { method: "DELETE" },
+    );
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    };
+  },
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
