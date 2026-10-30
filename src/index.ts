@@ -319,5 +319,32 @@ server.registerTool(
   },
 );
 
+server.registerTool(
+  "transfer_collection",
+  {
+    title: "Transfer collection",
+    description:
+      "Transfer a collection (and its documents) to another workspace. The API token's user must be a member of the target workspace. Provide the target workspace slug.",
+    inputSchema: {
+      collectionId: z.string().describe("ID of the collection (database) to transfer"),
+      targetWorkspaceSlug: z
+        .string()
+        .describe("Slug of the target workspace"),
+    },
+  },
+  async ({ collectionId, targetWorkspaceSlug }) => {
+    const data = await api<{ ok: boolean }>(
+      `/databases/${collectionId}/transfer`,
+      {
+        method: "POST",
+        body: JSON.stringify({ targetWorkspaceSlug }),
+      },
+    );
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    };
+  },
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
